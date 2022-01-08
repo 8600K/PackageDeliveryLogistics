@@ -1,9 +1,7 @@
-#Miles Engelbrecht | Student ID #001435519
+# Miles Engelbrecht | Student ID #001435519
 
 
 import csv
-
-
 
 
 # No duplicate keys.
@@ -90,7 +88,7 @@ class HashMap:
         print("Ran!")
         if self.map[hashedKey] is None:
             return False
-        for i in range (0, len(self.map[hashedKey])):
+        for i in range(0, len(self.map[hashedKey])):
             print("Ran!!!")
             if self.map[hashedKey][i][0] == key:
                 self.map[hashedKey].pop(i)  # Test this with remove or some other function.
@@ -101,6 +99,7 @@ class HashMap:
         for item in self.map:
             if item is not None:
                 print(str(item))
+
 
 def ui():
     uInput = True
@@ -114,33 +113,33 @@ def ui():
             print("This ran!")
             return False
 
+
 def distance():
     with open("WGUPS Distance Table.csv", mode='r', encoding='utf-8') as fileInput:
-
         csvFile = csv.reader(fileInput)
         myList = []
         for i in csvFile:
-            #print(i)
+            # print(i)
             myList.append(i)
     return myList
 
 
-
-#ui()
-
+# ui()
 
 
 distance()
 
 h = HashMap()
 keyAmount = h.getData("WGUPS Package File.csv")
-#h.print()
-#h.delete("31")
-#h.print()
+# h.print()
+# h.delete("31")
+# h.print()
 
-#print("Got", h.get('9'))
+# print("Got", h.get('9'))
 
 distList = distance()
+
+
 # Turn item into what we get from the first Excel document
 # item = '195 W Oakland Ave (84115)'
 
@@ -161,25 +160,32 @@ def getVipPackages():
 
     return prime
 
+
 # START OF THE ALGORITHM
 
 
 primes = getVipPackages()
 
-#print(distList[1][1])
 
-#for i in distList:
-    #for j in primes:
-        #if(j == i[1]):
-            ##print("FOUND!", i)
-            #c = len(i) - 1
-            #print(i [1:len(i)-1])
-            #continue
-    #print(i [1:len(i)])
+# print(distList[1][1])
+
+def printDist():
+    for i in distList:
+        for j in primes:
+            if (j == i[1]):
+                # print("FOUND!", i)
+                c = len(i) - 1
+                print(i[1:len(i) - 1])
+                continue
+        # print(i [1:len(i)])
+
+
+# THIS IS JUST FINDING THE FASTEST ROUTE. NO PRIME PACKAGES
 some = 100.0
+index = None
 for i, dist in enumerate(distList):
 
-    #print(dist[2])\
+    # print(dist[2])\
     try:
         float(dist[2])
     except ValueError:
@@ -187,41 +193,43 @@ for i, dist in enumerate(distList):
     else:
         if 0.0 < float(dist[2]) < float(some):
             some = dist[2]
-            print(some)
-            print(i)
+            index = i
+
+print(some)
+print(index)
+# printDist()
+print(distList[20])
+print(len(distList[20]))
+# 23
+# print(distList[21][22])
+
+tempLow = 256
+print("Check", distList[20])  # - 2???
+for j, dist in enumerate(distList):
+    if j > 20:
+        print(dist[23 - 1])
+        x = float(dist[23 - 1])
+        if x < tempLow:
+            tempLow = x
+print("TempLow y AXIS: ",tempLow)
 
 
-
-
-
-
-
-
-
-#for sublist in distList:
-    #for i in range(len(primes)):
-        #if primes[i] == sublist[1]:
-            #print(primes[i])
-            #print(sublist)
-            #continue
-#list(set(primes).intersection(distList))
-
-
-
+# for sublist in distList:
+# for i in range(len(primes)):
+# if primes[i] == sublist[1]:
+# print(primes[i])
+# print(sublist)
+# continue
+# list(set(primes).intersection(distList))
 
 
 # 5383 South 900 East #104 (84117)
 
-#for sublist in distList:
+# for sublist in distList:
 #    if sublist[1] == primes[7]:
 #        print("Found it!", sublist)
 #        break
 
 
-
 # EG At the Hub, En Route, Or Delivered.
 # 0: Package ID | 1: Address | 2: Deadline | 3: City | 4: Zip Code | 5: Weight | 6: Delivery Status
-
-
-
-

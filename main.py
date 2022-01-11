@@ -179,39 +179,76 @@ def printDist():
                 continue
         # print(i [1:len(i)])
 
-#Commit!
+
+# Commit!
 # THIS IS JUST FINDING THE FASTEST ROUTE. NO PRIME PACKAGES
-some = 100.0
-index = None
-for i, dist in enumerate(distList):
 
-    # print(dist[2])\
-    try:
-        float(dist[2])
-    except ValueError:
-        None
-    else:
-        if 0.0 < float(dist[2]) < float(some):
-            some = dist[2]
-            index = i
+def YAxis(col, row):
+    val = 100.0
+    for i, dist in enumerate(distList):
+        if i >= col:
+            try:
+                float(dist[row])
+            except ValueError:
+                None
+            else:
+                if 0.0 < float(dist[row]) < float(val):
+                    val = dist[row]
+                    index = i
+    return val, index
 
-print(some)
-print(index)
+
+val, index = YAxis(0, 2)
+
+print("Some! ", val)
+print(index) # 20
 # printDist()
 print(distList[20])
 print(len(distList[20]))
+leng = len(distList[index]) - 1
+
 # 23
 # print(distList[21][22])
 
 tempLow = 256
 print("Check", distList[20])  # - 2???
-for j, dist in enumerate(distList):
-    if j > 20:
-        print(dist[23 - 1])
-        x = float(dist[23 - 1])
-        if x < tempLow:
-            tempLow = x
-print("TempLow y AXIS: ",tempLow)
+
+val, index = YAxis(index, leng)
+print(val)
+print(index)
+print(distList[21])
+
+
+def XAxis(row, used):
+    val = 100.0
+    leng = len(distList[row])
+    for i in range(2, len(distList[row]) - 1):
+        if float(distList[row][i]) != used and float(distList[row][i]) < float(val):
+            val = distList[row][i]
+    return val
+
+val = XAxis(20, 1.9)
+print(val)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 # for sublist in distList:

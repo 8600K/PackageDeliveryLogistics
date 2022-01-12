@@ -183,10 +183,9 @@ def printDist():
 # Commit!
 # THIS IS JUST FINDING THE FASTEST ROUTE. NO PRIME PACKAGES
 
-def YAxis(col, row, used):
+def YAxis(col, row, used, list):
     val = 100.0
-    # val1 = 100.0
-    for i, dist in enumerate(distList):
+    for i, dist in enumerate(list):
         if i >= col:
             try:
                 float(dist[row])
@@ -195,17 +194,20 @@ def YAxis(col, row, used):
             else:
                 if 0.0 < float(dist[row]) < float(val):
                     val = dist[row]
-                    index = i
+                    index = distList.index(dist)
 
     for i in range(2, len(distList[row]) - 1):
-        if float(distList[row][i]) != used and float(distList[row][i]) < float(val):
-            val = distList[row][i]
+        if float(list[row][i]) != used and float(list[row][i]) < float(val):
+            val = list[row][i]
+            index = distList.index(dist)
+            print(distList[i])
+            #Obv test this more but we should be in business.
 
     return val, index
 
 
-val, index = YAxis(0, 2, None)
-
+val, index = YAxis(0, 2, None, distList)
+print(len(distList[0]))
 print("Some! ", val)
 print(index) # 20
 # printDist()
@@ -213,11 +215,21 @@ print(distList[20])
 print(len(distList[20]))
 leng = len(distList[index]) - 1
 
-val, index = YAxis(index, len(distList[index]) - 1, val)
+val, index = YAxis(index, len(distList[index]) - 1, val, distList)
+
+sublist = [distList[5], distList[3], distList[4]]
 
 print(val)
 print(index)
 print(distList[index])
+
+val, index = YAxis(0, 2, None, sublist)
+
+print(val)
+print(index)
+print(distList[index])
+
+#print(h.get(str(5), None))
 
 # 23
 # print(distList[21][22])

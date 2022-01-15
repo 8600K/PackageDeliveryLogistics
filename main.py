@@ -25,9 +25,9 @@ class HashMap:
             hash += ord(char)
         return hash % self.size
 
-    def add(self, key, v0, v1, v2, v3, v4, v5):
+    def add(self, key, v0, v1, v2, v3, v4, v5, v6):
         hashedKey = self.getHash(key)
-        values = [key, v0, v1, v2, v3, v4, v5]
+        values = [key, v0, v1, v2, v3, v4, v5, v6]
 
         if self.map[hashedKey] is None:
             self.map[hashedKey] = list([values])
@@ -41,6 +41,7 @@ class HashMap:
                     data[4] = v3
                     data[5] = v4
                     data[6] = v5
+                    data[7] = v6
                     return True
             self.map[hashedKey].append(values)
             return True
@@ -53,7 +54,10 @@ class HashMap:
             keys = 0
             for row in csvFile:
                 if row[0].isnumeric():
-                    self.add(row[0], row[1], row[2], row[3], row[4], row[5], row[6])
+                    try:
+                        self.add(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7])
+                    except IndexError:
+                        self.add(row[0], row[1], row[2], row[3], row[4], row[5], row[6], "At Hub")
                 else:
                     continue
                 keys += 1
@@ -62,11 +66,11 @@ class HashMap:
     def get(self, key, rows):
         hashedKey = self.getHash(key)
         if self.map[hashedKey] is not None:
-            for pair in self.map[hashedKey]:  # Expand upon this.  Should have a feature to get options directly.
+            for pair in self.map[hashedKey]:
                 if pair[0] == key:
                     if rows == None:
                         return str(pair[1]) + " " + str(pair[2]) + " " + str(pair[3]) + " " + str(pair[4]) + " " + str \
-                            (pair[5]) + " " + str(pair[6])
+                            (pair[5]) + " " + str(pair[6]) + " " + str(pair[7])
                     elif rows == 1:
                         return str(pair[1])  # Address
                     elif rows == 2:
@@ -79,6 +83,8 @@ class HashMap:
                         return str(pair[5])  # Time
                     elif rows == 6:
                         return str(pair[6])  # Weight
+                    elif rows == 7:
+                        return str(pair[7])  # Status.  Starts blank except where a special note resides
                     else:
                         return None
         return None
@@ -144,14 +150,14 @@ distList = distance()
 # item = '195 W Oakland Ave (84115)'
 
 # Get packages that need to be delivered before EOD.
-def getVipPackages():
+def getCertainPackages(word, index):
     i = 1
     prime = []
     while i <= keyAmount:
 
-        word = 'EOD'
-        tempStr = h.get(str(i), 5)
-        if word not in tempStr:
+        # word = 'EOD'
+        tempStr = h.get(str(i), index)
+        if word in tempStr:
             prime.append(h.get(str(i), 1) + " (" + h.get(str(i), 4) + ")" + ":" + tempStr)
         i += 1
 
@@ -164,26 +170,55 @@ def getVipPackages():
 # START OF THE ALGORITHM
 
 
-primes = getVipPackages()
+# primes = getPrimePackages('EOD')
+
+primes = getCertainPackages('EOD', 5)
+#print(primes)
+
+truck2 = getCertainPackages('Can only be on truck 2', 7)
+#print(truck2)
+
+delayed = getCertainPackages('Delayed on flight---will not arrive to depot until 9:05 am', 7)
+#print(delayed)
+
+goWith = getCertainPackages('Must be delivered with', 7)
+#print(goWith)
+
+wrongAddress = getCertainPackages('Wrong address listed', 7)
+#print(wrongAddress)
 
 
-# print(distList[1][1])
 
-def printDist():
+
+
+
+
+
+def printDist(sublist):
+    returnList = []
     for i in distList:
-        for j in primes:
+        for j in sublist:
             if (j == i[1]):
                 # print("FOUND!", i)
                 c = len(i) - 1
-                print(i[1:len(i) - 1])
+                # print(i[0:len(i)])
+                returnList.append(i[0:len(i) ])
                 continue
+    return returnList
+
         # print(i [1:len(i)])
 
 
 # Commit!
 # THIS IS JUST FINDING THE FASTEST ROUTE. NO PRIME PACKAGES
 
-def YAxis(col, row, used, list):
+newTruck2 = printDist(truck2)
+newDelayed = printDist(delayed)
+newPrimes = printDist(primes)
+
+print(newTruck2)
+
+def findNext(col, row, used, list):
     val = 100.0
     for i, dist in enumerate(list):
         if i >= col:
@@ -194,53 +229,87 @@ def YAxis(col, row, used, list):
             else:
                 if 0.0 < float(dist[row]) < float(val):
                     val = dist[row]
+                    print(dist)
                     index = distList.index(dist)
 
-    for i in range(2, len(distList[row]) - 1):
-        if float(list[row][i]) != used and float(list[row][i]) < float(val):
-            val = list[row][i]
-            index = distList.index(dist)
-            print(distList[i])
-            #Obv test this more but we should be in business.
+    if(used != 'HUB'):
+        for i in range(2, len(distList[row]) - 1):
+            if float(list[row][i]) != used and float(list[row][i]) < float(val) and float(list[row][i] != 0.0):
+                val = list[row][i]
+                index = distList.index(dist)
+                print(distList[i])
+                # Obv test this more but we should be in business.
 
     return val, index
 
 
-val, index = YAxis(0, 2, None, distList)
-print(len(distList[0]))
-print("Some! ", val)
-print(index) # 20
-# printDist()
-print(distList[20])
-print(len(distList[20]))
-leng = len(distList[index]) - 1
+# sublist = [distList]
 
-val, index = YAxis(index, len(distList[index]) - 1, val, distList)
+def findNxt(list):
+    val = 100.0
+    for i, dist in enumerate(list):
+        print(dist[2])
+        if float(dist[2]) < val:
+            val = float(dist[2])
+            index = i
+    print("Value :", val)
+    print("Length :", index)
 
-sublist = [distList[5], distList[3], distList[4]]
 
-print(val)
-print(index)
-print(distList[index])
+    print("\n")
 
-val, index = YAxis(0, 2, None, sublist)
+    for i, dist in enumerate(list):
+        # print(dist)
+        length = len(list[2]) - 2
+        if length > len(dist) - 2: # If our length is greater than the current dist we are on, get the current dist length and find it on our length's row.
+            sublength = len(dist) - 2
+            print(list[2][sublength + 1])  # Had to make elif because in case where they equal, I would get a repeated value.
+        elif length < len(dist) - 2:  # If the length is less than the length of the dist we are checking, go to that row, and check our length against it.
+            print(list[i][length + 1])
 
-print(val)
-print(index)
-print(distList[index])
+        # Return total miles.
+        # Return listNumber.
+        # Recursive this?
 
-#print(h.get(str(5), None))
 
-# 23
-# print(distList[21][22])
+    #for dist in list:
+    #    print(dist[len(dist) - 2])
 
-tempLow = 256
-#print("Check", distList[20])  # - 2???
 
-# val, index = YAxis(index, leng, 0)
-#print(val)
-#print(index)
-#print(distList[21])
+
+
+
+
+
+
+
+
+findNxt(newTruck2)
+
+
+#print(distList.index('1060 Dalton Ave S (84104)', 1, 2))
+#print(distList.index(['International Peace Gardens 1060 Dalton Ave S', '1060 Dalton Ave S (84104)', '7.2', '0.0']))
+
+
+# NODE distList should start at 0,2, ANY LIST THAT HAS BEEN RUN THROUGH GETCERTAINPACKAGES THE 2 SHOULD BE 1!!!
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 def XAxis(row, used):
@@ -252,44 +321,6 @@ def XAxis(row, used):
     return val
 
 # val, index = YAxis(index, leng)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# for sublist in distList:
-# for i in range(len(primes)):
-# if primes[i] == sublist[1]:
-# print(primes[i])
-# print(sublist)
-# continue
-# list(set(primes).intersection(distList))
-
-
-# 5383 South 900 East #104 (84117)
-
-# for sublist in distList:
-#    if sublist[1] == primes[7]:
-#        print("Found it!", sublist)
-#        break
 
 
 # EG At the Hub, En Route, Or Delivered.

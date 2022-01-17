@@ -217,6 +217,7 @@ newDelayed = printDist(delayed)
 newPrimes = printDist(primes)
 
 print(newTruck2)
+print(newDelayed)
 
 def findNext(col, row, used, list):
     val = 100.0
@@ -245,27 +246,69 @@ def findNext(col, row, used, list):
 
 # sublist = [distList]
 
-def findNxt(list):
+def findNxt(list, index, totalMiles):
+
+    if(len(list) == 0):  # Could also check for list having one value.  Should also work.
+        print("Does this ever run?")
+        return totalMiles
+
+    newIndex = None
     val = 100.0
-    for i, dist in enumerate(list):
-        print(dist[2])
-        if float(dist[2]) < val:
-            val = float(dist[2])
-            index = i
-    print("Value :", val)
-    print("Length :", index)
+    if(index == 'HUB'):
+        for i, dist in enumerate(list):
+            print(dist[2])
+            if float(dist[2]) < val:
+                val = float(dist[2])
+                totalMiles = val
+                index = i
+        print("Value :", val)
+        print("Length :", index) # This gets length from hub.
+        return findNxt(list, index, totalMiles)
 
 
     print("\n")
 
-    for i, dist in enumerate(list):
+    for i, dist in enumerate(list):  # OK SO THIS CHECKS IF THE INDEX WE ARE USING IS NOW TOO BIG BECAUSE OF THE POP.  SHOULD WORK!
         # print(dist)
-        length = len(list[2]) - 2
-        if length > len(dist) - 2: # If our length is greater than the current dist we are on, get the current dist length and find it on our length's row.
-            sublength = len(dist) - 2
-            print(list[2][sublength + 1])  # Had to make elif because in case where they equal, I would get a repeated value.
-        elif length < len(dist) - 2:  # If the length is less than the length of the dist we are checking, go to that row, and check our length against it.
-            print(list[i][length + 1])
+        try:
+            length = len(list[index]) - 2
+        except IndexError:
+            print("Broke...?")
+            index = index - 1
+            # length = len(list[index - 1]) - 2
+            print("Nope!")
+        finally:
+
+            #print("PREBREAK: ", index)
+            #print("THIS IS WHAT BREAKS: ", len(list[index]))
+            length = len(list[index]) - 2
+            if length > len(dist) - 2: # If our length is greater than the current dist we are on, get the current dist length and find it on our length's row.
+                sublength = len(dist) - 2
+                print(list[index][sublength + 1])  # Had to make elif because in case where they equal, I would get a repeated value.
+                if float(list[index][sublength + 1]) < float(val):
+                    val = list[index][sublength + 1]
+                    newIndex = i
+            elif length < len(dist) - 2:  # If the length is less than the length of the dist we are checking, go to that row, and check our length against it.
+                print(list[i][length + 1])
+                if float(list[i][length + 1]) < float(val):
+                    val = list[i][length + 1]
+                    newIndex = i
+    print("\n")
+    print("val...", val)
+    print("newIndex: ",newIndex)
+    newList = list
+    newList.pop(index)
+    print(newList)
+
+
+    if val != 100.0:
+        totalMiles += float(val)
+        print("total miles: ", totalMiles)
+    return findNxt(newList, newIndex, totalMiles)
+
+
+
+
 
         # Return total miles.
         # Return listNumber.
@@ -284,8 +327,19 @@ def findNxt(list):
 
 
 
-findNxt(newTruck2)
+#miles = findNxt(newTruck2, 'HUB', 0)
 
+#print("Miles: ", miles)
+
+delay = findNxt(newDelayed, 'HUB', 0)
+
+print("Delayed Miles: ", delay)
+
+# Some round feature here?  Python seems to want to be deathly accurate, lol.
+
+#prime = findNxt(newPrimes, 'HUB', 0)
+
+#print(prime)
 
 #print(distList.index('1060 Dalton Ave S (84104)', 1, 2))
 #print(distList.index(['International Peace Gardens 1060 Dalton Ave S', '1060 Dalton Ave S (84104)', '7.2', '0.0']))

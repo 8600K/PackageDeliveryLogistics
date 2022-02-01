@@ -542,6 +542,72 @@ print("\n")
 woah1 = findNxt(secondRoute, 'HUB', allKeys)
 
 
+# I do believe everything up till here works like a charm.  Needs a little more checking.
+
+print("\n")
+print("\n")
+
+h.print()
+
+whole, wholeKeys = getCertainPackages('UT', 3)
+
+truck2, truck2Keys = getCertainPackages('Can only be on truck 2', 7)
+
+wrongAddress, wrongAddressKeys = getCertainPackages('Wrong address listed', 7)
+
+newWhole = printDist(whole)
+newTruck2 = printDist(truck2)
+newWrongAddress = printDist(wrongAddress)
+
+firstKeys = truck2Keys + wrongAddressKeys
+
+firstKeys = [element for element in wholeKeys if element not in firstKeys]
+
+
+print(wholeKeys)
+print("Len", len(wholeKeys))
+print(firstKeys)
+
+
+firstRoute = [element for element in newWhole if element not in newWrongAddress]
+firstRoute = [element for element in firstRoute if element not in newTruck2]
+
+print(firstRoute)
+print(len(firstRoute))
+
+# TODO Figure out why the Keys are bein so wacky.  allKeys work but I cannot seem to find a good algorithm for lowering amount of keys to speed up setDelivered...
+
+
+# TODO milesToGo = 19.5 + milesReturnedFromTruck1
+
+woah2 = findNxt(firstRoute, 'HUB', allKeys, 0, 19.5)
+
+
+whole, wholeKeys = getCertainPackages('UT', 3)
+
+print("\n")
+
+print(wholeKeys)
+print(len(wholeKeys))
+
+# Something funky is going on here.  Check it.
+# Also add two variables just to keep track of how many miles total trucks 1 and 2 have gone?
+# Or maybe this is where I need to use the parameter miles for this.
+
+newWhole = printDist(whole)
+print(newWhole)
+
+
+print("\n")
+
+# This should be Truck 1 Route 2...
+
+
+
+
+
+# Check time distance calc, I think we need to wait for the 10:20 package with this truck 1...
+
 
 
 # print(eod)

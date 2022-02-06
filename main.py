@@ -3,6 +3,7 @@
 
 import csv
 from datetime import datetime
+from datetime import timedelta
 
 # No duplicate keys.
 # O(1) for add, get, delete functions.
@@ -70,8 +71,9 @@ class HashMap:
             for pair in self.map[hashedKey]:
                 if pair[0] == key:
                     if rows == None:
-                        return str(pair[1]) + " " + str(pair[2]) + " " + str(pair[3]) + " " + str(pair[4]) + " " + str \
-                            (pair[5]) + " " + str(pair[6]) + " " + str(pair[7])
+                        return str(pair[0] + " " + pair[1]) + " " + str(pair[2]) + " " + str(pair[3]) + " " + str(
+                            pair[4]) + " " + str \
+                                   (pair[5]) + " " + str(pair[6]) + " " + str(pair[7])
                     elif rows == 0:
                         return str(pair[0])
                     elif rows == 1:
@@ -98,7 +100,7 @@ class HashMap:
             for data in self.map[hashedKey]:
                 if data[0] == key:
                     data[row] = updatedData
-                    print("This ran!  Good job.")
+                    # print("This ran!  Good job.")
 
     def delete(self, key):
         hashedKey = self.getHash(key)
@@ -161,17 +163,18 @@ distList = distance()
 # item = '195 W Oakland Ave (84115)'
 
 # Get packages that need to be delivered before EOD.
-def getCertainPackages(word, index):
+def getCertainPackages(word, index, bool=0):
     i = 1
     prime = []
     keyList = []
     while i <= keyAmount:
 
-        # ALSO CHECK THAT IT'S AT HUB!
-        # word = 'EOD'
+        if bool == 1:
+            if word in h.get(str(i), 7) == 'Delivered at':
+                prime.append(h.get(str(i), 1) + " (" + h.get(str(i), 4) + ")" + ":" + tempStr + " ")
 
         tempStr = h.get(str(i), index)
-        if word in tempStr and h.get(str(i), 7) != 'Delivered':
+        if word in tempStr and 'Delivered at' not in h.get(str(i), 7):
             prime.append(h.get(str(i), 1) + " (" + h.get(str(i), 4) + ")" + ":" + tempStr + " ")
             # print(h.get(str(i), 0))
             # print(prime)
@@ -200,58 +203,56 @@ def printDist(sublist):
     # print(i [1:len(i)])
 
 
-# Commit!
-# THIS IS JUST FINDING THE FASTEST ROUTE. NO PRIME PACKAGES
-
-
 print("\n")
+
+
 # GLOBAL VARIABLE FOR COUNTING
 
 
-def findNxt(list, index, keyss, totalMiles=0, miles=0, keyCounter=0):
+def findNxt(list, index, keyss, truckMilage, totalMiles=0, miles=0, keyCounter=0):
     print("KeysCounted", keyCounter)
 
-    if len(list) == 1 or keyCounter >= 16:
-        print("This ran!  !  !")
+    if (len(list) == 1 or keyCounter >= 16) and index != 'HUB':
+        # print("This ran!  !  !")
         totalMiles += float(list[0][2])  # Gets us back to the hub.
         # print("Should be 3.7...? ", val)
         return totalMiles
 
-
-
-    if totalMiles < miles != 0 and totalMiles != 0: # NOTE...
+    if totalMiles < miles != 0 and totalMiles != 0 and index != 'HUB':  # NOTE...
         if totalMiles + float(list[int(index)][2]) >= miles:
             totalMiles += float(list[index][2])
-            print("And here we returned... ", list[index][2])
-            print("Total Miles: ", totalMiles)
+            # print("And here we returned... ", list[index][2])
+            # print("Total Miles: ", totalMiles)
             return totalMiles
     elif totalMiles > miles != 0:
-        print("And here we returned electric 2: ", list[index][2])
+        # print("And here we returned electric 2: ", list[index][2])
         totalMiles += float(list[index][2])
-        print("Total Miles: ", totalMiles)
+        # print("Total Miles: ", totalMiles)
         return totalMiles
 
     newIndex = None
     val = 100.0
     test = None
     if (index == 'HUB'):
+        tempTotalMiles = totalMiles
         for i, dist in enumerate(list):
-            print(dist[2])
+            # print(dist[2])
             if float(dist[2]) < val:
                 val = float(dist[2])
                 totalMiles = val
                 index = i
                 test = dist[1][:-8]
                 # print("Here it is! ",test[:-8])
-        print("Value :", val)
-        print("Length :", index)
-        print("First!11! :", test)  # This gets length from hub.
+        # print("Value :", val)
+        # print("Length :", index)
+        # print("First!11! :", test)  # This gets length from hub.
+        totalMiles += tempTotalMiles
         # print("SECOND DIST: ", test)
         # setDelivered(test, keyListt, totalMiles)
-        keyCounter = setDelivered(test, keyss, totalMiles, keyCounter)
-        return findNxt(list, index, keyss, totalMiles, miles, keyCounter)
+        keyCounter = setDelivered(test, keyss, totalMiles, keyCounter, truckMilage)
+        return findNxt(list, index, keyss, truckMilage, totalMiles, miles, keyCounter)
 
-    print("\n")
+    # print("\n")
 
     for i, dist in enumerate(list):  # OK SO THIS CHECKS IF THE INDEX WE ARE USING IS NOW TOO BIG BECAUSE OF THE POP.  SHOULD WORK!
         # print(dist)
@@ -265,8 +266,7 @@ def findNxt(list, index, keyss, totalMiles=0, miles=0, keyCounter=0):
             if length > len(
                     dist) - 2:  # If our length is greater than the current dist we are on, get the current dist length and find it on our length's row.
                 sublength = len(dist) - 2
-                print(list[index][
-                          sublength + 1])  # Had to make elif because in case where they equal, I would get a repeated value.
+                # print(list[index][sublength + 1])  # Had to make elif because in case where they equal, I would get a repeated value.
                 if float(list[index][sublength + 1]) < float(val):
                     val = list[index][sublength + 1]
                     newIndex = i
@@ -275,43 +275,52 @@ def findNxt(list, index, keyss, totalMiles=0, miles=0, keyCounter=0):
                     # setDelivered(test, keyListt)
             elif length < len(
                     dist) - 2:  # If the length is less than the length of the dist we are checking, go to that row, and check our length against it.
-                print(list[i][length + 1])
+                # print(list[i][length + 1])
                 if float(list[i][length + 1]) < float(val):
                     val = list[i][length + 1]
                     newIndex = i
                     test = str(dist[1][:-8])
 
-    print("\n")
-    print("val...", val)
-    print("newIndex: ", newIndex)
-    print("Here it is: ", list[newIndex])
-    print(list)
-    keyCounter = setDelivered(test, keyss, totalMiles, keyCounter)
+    # print("\n")
+    # print("val...", val)
+    # print("newIndex: ", newIndex)
+    # print("Here it is: ", list[newIndex])
+    # print(list)
+
+    keyCounter = setDelivered(test, keyss, totalMiles, keyCounter, truckMilage)
 
     newList = list
     newList.pop(index)
-    print(newList)
+    # print(newList)
 
     if val != 100.0:
         totalMiles += float(val)
-        print("total miles: ", totalMiles)
+        # print("total miles: ", totalMiles)
 
     if index < newIndex:
         newIndex -= 1
 
-    return findNxt(newList, newIndex, keyss, totalMiles, miles, keyCounter)
+    return findNxt(newList, newIndex, keyss, truckMilage, totalMiles, miles, keyCounter)
 
 
 timeCounter = []
 
-def setDelivered(address, keys1, miles, keyCounter):
 
+def setDelivered(address, keys1, miles, keyCounter, truckMilage):
     print("KEYS!!!", keys1)
+    # print("MILES: ", miles)
+    # print((miles/18) * 60)
+    # print(address)
+
+    startTime = datetime.strptime('08:00', "%H:%M")  # Start Time.
+    finalTime = startTime + timedelta(minutes=(miles / 18) * 60)
+    finalTime = (str(finalTime)[11:])
+    finalTime = (finalTime[:5])
+
     for key in keys1:
         if h.get(str(key), 1) == address:
-            h.update(str(key), 7, "Delivered")
-            # TODO Do that shit.
-            timeCounter.append( (key, miles) )
+            h.update(str(key), 7, "Delivered at " + finalTime)
+            timeCounter.append((key, miles, truckMilage))
             print("Ran!", h.get(str(key), 0))
             keyCounter += 1
 
@@ -329,315 +338,170 @@ def setInDelivery(address, keys):
             amt += 1
     return amt
 
-def timeConvert(myTime):
-    startTime = datetime.strptime('08:00', "%H:%M") # Start Time.
+
+def timeConvert(myTime, bool=0):
+    startTime = datetime.strptime('08:00', "%H:%M")  # Start Time.
     checkTime = datetime.strptime(str(myTime), "%H:%M")
 
     timeDifference = checkTime - startTime
 
-    timeCheck = 18 * timeDifference.seconds / 3600 # Speed Distance Time Calculator
-    print("This should be 13.5", timeCheck)
+    timeCheck = 18 * timeDifference.seconds / 3600  # Speed Distance Time Calculator
 
-    for i, timeCount in enumerate(timeCounter):
-        if timeCounter[i][1] <= timeCheck:
-            print(h.get(str(timeCounter[i][0]), None))
+    if bool == 0:
+        for i, timeCount in enumerate(timeCounter):
+            if timeCounter[i][1] <= timeCheck:
+                print(h.get(str(timeCounter[i][0]), None))
+            elif timeCounter[i][2] <= timeCheck:
+                tempStr = str(h.get(str(timeCounter[i][0]), None)[:-18])
+                print(tempStr + 'En Route')
+            else:
+                tempStr = str(h.get(str(timeCounter[i][0]), None)[:-18])
+                print(tempStr + 'At the Hub')
+    else:
+        print("Hello")
+        print(bool)
+        for i, timeCount in enumerate(timeCounter):
+            # print(h.get(str(timeCounter[i][0]), 0))
+            if int(h.get(str(timeCounter[i][0]), 0)) == bool:
+                print(timeCounter[i][1])
+                print(timeCheck)
+                print("Here:", timeCounter[i][0])
+                if timeCounter[i][1] <= timeCheck:
+                    print(h.get(str(timeCounter[i][0]), None))
+                elif timeCounter[i][2] <= timeCheck:
+                    tempStr = str(h.get(str(timeCounter[i][0]), None)[:-18])
+                    print(tempStr + 'En Route')
+                else:
+                    tempStr = str(h.get(str(timeCounter[i][0]), None)[:-18])
+                    print(tempStr + 'At the Hub')
 
 
-
-
-    #for i in timeCounter:
-
-
-    # Set progress!
-    # Can set the out for delivery once I run this program.  Make new function?
-    # Set delivered somehow...
-
-    # Return total miles.
-    # Return listNumber.
-    # Recursive this?
-
-    # for dist in list:
-    #    print(dist[len(dist) - 2])
-
-
-# START OF THE ALGORITHM
-
-
-# primes = getPrimePackages('EOD')
-
-# primes, keyList = getCertainPackages(':', 5)  # Let's go!
-
-# print(primes)
-
-# eod, keyList = getCertainPackages('EOD', 5)
-# print(eod)
-
-# print("Hash: ", h.getHash(1))
-# print("H: ", h.get('1', 1))
-
-# truck2, keyList = getCertainPackages('Can only be on truck 2', 7)
-# print("Keys: ", keyList)
-# print(truck2)
+# TRUCK2--------------------------------------------------------------------------------------------------------------------------------------
 
 delayed, delayedKeys = getCertainPackages('Delayed on flight---will not arrive to depot until 9:05 am', 7)
-# print("CHCK", delayed) Works.
-
-
 deliveredWith, deliveredWithKeys = getCertainPackages('Must be delivered with', 7)
-# print(goWith)
-
 wrongAddress, wrongAddressKeys = getCertainPackages('Wrong address listed', 7)
-# print(wrongAddress)
-
-whole, keyListtt = getCertainPackages('UT', 3)
+truck2, truck2Keys = getCertainPackages('Can only be on truck 2', 7)
+whole, wholeKeys = getCertainPackages('UT', 3)
+prime, primeKeys = getCertainPackages(':', 5)
+eod, eodKeys = getCertainPackages('EOD', 5)
 
 allKeys = list(range(1, 41))
-print("Should print all keys: ", allKeys)
 
-print(deliveredWith)
+
 deliveredWith.append(h.get(str(13), 1) + " (" + h.get(str(13), 4) + ")")  # This works!
 deliveredWith.append(h.get(str(15), 1) + " (" + h.get(str(15), 4) + ")")
 deliveredWith.append(h.get(str(19), 1) + " (" + h.get(str(19), 4) + ")")
-print(deliveredWith)
-
-# newPrimes = printDist(primes)
-# newTruck2 = printDist(truck2)
 
 
 newWhole = printDist(whole)
 newDelayed = printDist(delayed)
 newWrongAddress = printDist(wrongAddress)
 newDeliveredWith = printDist(deliveredWith)
-
-print("\n")
-deliveredWithKeys.append(13)
-deliveredWithKeys.append(15)
-deliveredWithKeys.append(19)
-firstKeys = delayedKeys + wrongAddressKeys + deliveredWithKeys
-firstKeys = [int(x) for x in firstKeys]
-firstKeys = [element for element in allKeys if element not in firstKeys]
-print("I wanna know! ")
-print(firstKeys)
-print("\n")
-
-print("newDeliveredWith: ", newDeliveredWith)
-print(len(newDeliveredWith))
-
-# Probably change this to second route
-firstRoute = [element for element in newWhole if element not in newDelayed]
-firstRoute = [element for element in firstRoute if element not in newWrongAddress]
-firstRoute = [element for element in firstRoute if element not in newDeliveredWith]
-
-print("First Route... ", firstRoute)
-print(len(firstRoute))
-print(len(newWhole))
-# Seems to be working.
-
-print("\n")
-
-# So change this to truck 2...?
-
-truck2 = findNxt(firstRoute, 'HUB', firstKeys, 0, 19.5)
-newWhole = printDist(firstRoute)
-
-print("Check", truck2)
-
-#list_difference = [item for item in newWhole if item not in woah]
-#print("\n")
-#print("This is it! ", list_difference)
-#print(len(list_difference))
-print("\n")
-
-print(h.get('32', 1))
-
-print("\n")
-
-h.print()
-
-truck2, keyList = getCertainPackages('Can only be on truck 2', 7)
-
 newTruck2 = printDist(truck2)
-
-print(newTruck2)
-
-
-
-print("\n")
-
-# print(h.get(str('15'), None))
-
-print(timeCounter)
-
-
-timeConvert('8:45')
-# timeConvert('10:00') Let's go!
-
-# UP TO HERE WORKS LIKE A CHARM.
-
-
-
-delayed, delayedKeys = getCertainPackages('Delayed on flight---will not arrive to depot until 9:05 am', 7)
-# print("CHCK", delayed) Works.
-
-
-deliveredWith, deliveredWithKeys = getCertainPackages('Must be delivered with', 7)
-# print(goWith)
-deliveredWith.append(h.get(str(13), 1) + " (" + h.get(str(13), 4) + ")")  # This works!
-deliveredWith.append(h.get(str(15), 1) + " (" + h.get(str(15), 4) + ")")
-deliveredWith.append(h.get(str(19), 1) + " (" + h.get(str(19), 4) + ")") # Shouldn't need this here!
-deliveredWithKeys.append(h.get(str(13), 0))
-deliveredWithKeys.append(h.get(str(15), 0))
-deliveredWithKeys.append(h.get(str(19), 0))
-
-eod, eodKeys = getCertainPackages('EOD', 5)
-
-primes, primeKeys = getCertainPackages(':', 5)  # Let's go!
-
-wrongAddress, wrongAddressKeys = getCertainPackages('Wrong address listed', 7)
-
-truck2, truck2Keys = getCertainPackages('Can only be on truck 2', 7)
-
-whole, wholeKeys = getCertainPackages('UT', 3)
-
-newTruck2 = printDist(truck2)
-newWhole = printDist(whole)
-newDelayed = printDist(delayed)
-newWrongAddress = printDist(wrongAddress)
-newDeliveredWith = printDist(deliveredWith)
+newPrimes = printDist(prime)
 newEod = printDist(eod)
-newPrimes = printDist(primes)
 
-secondKeys0 = deliveredWithKeys + truck2Keys + primeKeys + eodKeys
-# secondKeys = [int(x) for x in secondKeys]  TODO Above on firstKeys use wholeKeys instead of the loop.  Then disable this line.
-# secondKeys = [element for element in wholeKeys if element not in secondKeys]
-secondKeys = []
-[secondKeys.append(element) for element in secondKeys0 if element not in secondKeys]
+deliveredWithKeys.append('13')
+deliveredWithKeys.append('15')
+deliveredWithKeys.append('19')
 
-print("Huh?", secondKeys)
-keyLength = len(secondKeys)
 
-secondRoute0 = newDeliveredWith + newPrimes + newTruck2
-secondRoute = []
-[secondRoute.append(element) for element in secondRoute0 if element not in secondRoute]
-
-#secondRoute = [element for element in newWhole if element not in newDelayed]
-#secondRoute = [element for element in secondRoute if element not in newWrongAddress]
-#secondRoute = [element for element in secondRoute if element not in newEod]
-
-print("\n")
-
+print(len(newWhole))
 print(deliveredWith)
-print(deliveredWithKeys)
-print(wrongAddressKeys)
-print(newWhole)
-
-print("Should be missing.", secondKeys)
-print(secondRoute)
-print(len(secondRoute))
-
-print("\n")
 
 
+firstRoute0 = newDeliveredWith + newTruck2
+firstRoute = []
+[firstRoute.append(element) for element in firstRoute0 if element not in firstRoute]
 
-woah1 = findNxt(secondRoute, 'HUB', allKeys)
+truck2Milage = findNxt(firstRoute, 'HUB', allKeys, 0)
 
-
-# I do believe everything up till here works like a charm.  Needs a little more checking.
-
+print(truck2Milage)
 print("\n")
 print("\n")
-
-h.print()
-
-whole, wholeKeys = getCertainPackages('UT', 3)
+print("\n")
+print("\n")
 
 truck2, truck2Keys = getCertainPackages('Can only be on truck 2', 7)
-
-wrongAddress, wrongAddressKeys = getCertainPackages('Wrong address listed', 7)
-
-newWhole = printDist(whole)
-newTruck2 = printDist(truck2)
-newWrongAddress = printDist(wrongAddress)
-
-firstKeys = truck2Keys + wrongAddressKeys
-
-firstKeys = [element for element in wholeKeys if element not in firstKeys]
-
-
-print(wholeKeys)
-print("Len", len(wholeKeys))
-print(firstKeys)
-
-
-firstRoute = [element for element in newWhole if element not in newWrongAddress]
-firstRoute = [element for element in firstRoute if element not in newTruck2]
-
-print(firstRoute)
-print(len(firstRoute))
-
-# TODO Figure out why the Keys are bein so wacky.  allKeys work but I cannot seem to find a good algorithm for lowering amount of keys to speed up setDelivered...
-
-
-# TODO milesToGo = 19.5 + milesReturnedFromTruck1
-
-woah2 = findNxt(firstRoute, 'HUB', allKeys, 0, 19.5)
-
-
+deliveredWith, deliveredWithKeys = getCertainPackages('Must be delivered with', 7)
 whole, wholeKeys = getCertainPackages('UT', 3)
+newTruck2 = printDist(truck2)
+newDeliveredWith = printDist(deliveredWith)
+newWhole = printDist(whole)
 
+# So far...
+prime, primeKeys = getCertainPackages(':', 5)
+newPrimes = printDist(prime)
+
+firstRoute = newWhole
+#for value in newWrongAddress:
+#      if value in firstRoute:
+#         firstRoute.remove(value)
+
+for value in newDelayed:
+      if value in firstRoute:
+         firstRoute.remove(value)
+
+
+
+
+truck1Milage = findNxt(firstRoute, 'HUB', allKeys, 0, 0, 19.5)
+print(truck1Milage)
+
+#Truck1 Part 2-------------------------------------------------------------------------
 print("\n")
+print("\n")
+print("\n")
+print("\n")
+
+truck2, truck2Keys = getCertainPackages('Can only be on truck 2', 7)
+deliveredWith, deliveredWithKeys = getCertainPackages('Must be delivered with', 7)
+delayed, delayedKeys = getCertainPackages('Delayed on flight---will not arrive to depot until 9:05 am', 7)
+whole, wholeKeys = getCertainPackages('UT', 3)
+prime, primeKeys = getCertainPackages(':', 5)
+
+newTruck2 = printDist(truck2)
+newDeliveredWith = printDist(deliveredWith)
+newWhole = printDist(whole)
+newDelayed = printDist(delayed)
+newPrimes = printDist(prime)
+
+firstRoute0 = newDelayed + newPrimes
+firstRoute = []
+[firstRoute.append(element) for element in firstRoute0 if element not in firstRoute]
+
+allKeys.remove(9) # Make this better.
+truck1Milage = findNxt(firstRoute, 'HUB', allKeys, truck1Milage, truck1Milage)
+print(truck1Milage)
+
+
+# Really hope this works........
+print("\n")
+print("\n")
+print("\n")
+print("\n")
+if truck1Milage >= 42 or truck2Milage >= 42:
+    h.update('9', 1, '410 S State St')
+    h.update('9', 2, 'Salt Lake City')
+    h.update('9', 4, '84111')
+    h.update('9', 7, '')
+    print("Ran I did")
+    # print(h.get('9', None))
+allKeys.append(9)
+allKeys.remove(37)
+allKeys.remove(38)
+allKeys.remove(12)
+whole, wholeKeys = getCertainPackages('UT', 3)
+newWhole = printDist(whole)
+
 
 print(wholeKeys)
-print(len(wholeKeys))
 
-# Something funky is going on here.  Check it.
-# Also add two variables just to keep track of how many miles total trucks 1 and 2 have gone?
-# Or maybe this is where I need to use the parameter miles for this.
+truck2Milage = findNxt(newWhole, 'HUB', wholeKeys, truck2Milage, truck2Milage)
 
-newWhole = printDist(whole)
-print(newWhole)
+print(truck2Milage + truck1Milage)
 
+print(truck2Milage + truck1Milage)
 
-print("\n")
-
-# This should be Truck 1 Route 2...
-
-
-
-
-
-# Check time distance calc, I think we need to wait for the 10:20 package with this truck 1...
-
-
-
-# print(eod)
-# newEod = printDist(eod)
-# print(newTruck2)
-# print("double check:", keyList)
-# print("Amt: ", len(newEod))
-
-# print("newPrimes: ", newPrimes)
-# print(newEod)
-# print(newWhole)
-# print(newTruck2)
-# print(newDelayed)
-# print("Check!", newEod)
-# print(newTruck2)
-
-# newWhole = (set(newWhole))
-
-# miles = findNxt(newTruck2, 'HUB', keyList, 0)
-
-# print("Miles: ", miles)
-
-# delay = findNxt(newDelayed, 'HUB')
-
-# print("Delayed Miles: ", delay)
-
-# Some round feature here?  Python seems to want to be deathly accurate, lol.
-
-# prime = findNxt(newPrimes, 'HUB', keyList)
-
-# end = findNxt(newEod, 'HUB', keyList, 0)
-
-# print("Miles: ", end)
+timeConvert("12:00", 11)
